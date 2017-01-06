@@ -40,6 +40,7 @@ public class Server implements Runnable {
 			udpSocket = new DatagramSocket(port);
 			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
 			udpSocket.receive(datagram);
+			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
 			udpSocket.send(createOffer(datagram.getData()));
 			udpSocket.close();
 		} catch (Exception e) {
@@ -65,6 +66,8 @@ public class Server implements Runnable {
 		for (int i=24; i<26; i++){
 			offerMessage[i] = requestMessage[i-24];
 		}
+		Main.LOGGER.info(getName()+": "+ "offer message has been created");
+		setRx(true);
 		return new DatagramPacket(offerMessage, offerMessage.length);
 	}
 
@@ -82,13 +85,13 @@ public class Server implements Runnable {
 	}
 	@Override
 	public void run() {
+		listenToRequests(6000);		
 		try {
 			createTcpSocket(6000, 7000);
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
-		}	
-		listenToRequests(6000);			
+		}		
 	}
 
 }
