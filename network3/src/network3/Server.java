@@ -86,7 +86,11 @@ public class Server implements Runnable {
 		for (int i=16; i<20; i++){
 			offerMessage[i] = requestMessage[i];
 		}
-		byte[] serverIp = tcpSocket.getInetAddress().getAddress();
+		byte[] serverIp = null;
+		try {
+			serverIp = InetAddress.getLocalHost().getAddress();
+		} catch (UnknownHostException e) {}
+
 		for (int i=20; i<=23; i++){
 			offerMessage[i] = serverIp[i-20];
 		}
