@@ -63,7 +63,7 @@ public class Server implements Runnable {
 			udpSocket.receive(datagram);
 			
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
-			udpSocket.send(createOffer(datagram.getData()));
+			udpSocket.send(createOffer(datagram));
 			Main.LOGGER.info(getName()+": "+ "offer message has been sent");
 			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
@@ -78,7 +78,8 @@ public class Server implements Runnable {
 		}		
 	}
 
-	private DatagramPacket createOffer(byte[] requestMessage){
+	private DatagramPacket createOffer(DatagramPacket datagram){
+		byte[] requestMessage = datagram.getData();
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
 		for (int i=0; i<=15; i++){
@@ -95,8 +96,8 @@ public class Server implements Runnable {
 		for (int i=24; i<26; i++){
 			offerMessage[i] = requestMessage[i-24];
 		}
-		Main.LOGGER.info(getName()+": "+ "offer message has been created");		
-		return new DatagramPacket(offerMessage, offerMessage.length);
+		Main.LOGGER.info(getName()+": "+ "offer message has been created");			
+		return new DatagramPacket(offerMessage, offerMessage.length,datagram.getAddress(),datagram.getPort());
 	}
 
 	
