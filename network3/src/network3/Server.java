@@ -83,7 +83,8 @@ public class Server implements Runnable {
 			listenToRequests(6000);	
 		} catch (Exception e) {
 			synchronized(Main.server){
-				udpSocket.close();
+				if(udpSocket != null)
+					udpSocket.close();
 			}
 			listenToRequests(port);
 		}		

@@ -69,6 +69,7 @@ public class Client implements Runnable{
 			sendRequest(port);		
 		} catch (Exception e) {
 			synchronized(Main.server){
+				if(udpSocket != null)
 				udpSocket.close();
 			}
 			listenToOffer(port);
