@@ -62,7 +62,8 @@ public class Client implements Runnable{
 			udpSocket.close();
 			//sendRequest(port);		
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			if(udpSocket!= null)
+				udpSocket.close();
 		}		
 	}	
 	private void readOfferMessage(DatagramPacket datagram){

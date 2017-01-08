@@ -71,7 +71,10 @@ public class Server implements Runnable {
 		}catch (SocketTimeoutException s) {
 			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
-		} catch (Exception e) {}		
+		} catch (Exception e) {
+			if(udpSocket!= null)
+				udpSocket.close();
+		}		
 	}
 
 	private DatagramPacket createOffer(byte[] requestMessage){
