@@ -68,8 +68,7 @@ public class Client implements Runnable{
 			}
 			sendRequest(port);		
 		} catch (Exception e) {
-			Main.LOGGER.info(getName()+": "+ e.getMessage());
-			System.exit(0);
+			listenToOffer(port);
 		}		
 	}	
 	private void readOfferMessage(DatagramPacket datagram){

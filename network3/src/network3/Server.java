@@ -56,6 +56,7 @@ public class Server implements Runnable {
 		byte[] requestMessage = new byte[32];
 		DatagramSocket udpSocket = null;
 		try {
+			Thread.sleep(100);
 			synchronized(Main.server){
 				udpSocket = new DatagramSocket(port);
 				udpSocket.setSoTimeout(1000);
@@ -81,8 +82,7 @@ public class Server implements Runnable {
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
 			listenToRequests(6000);	
 		} catch (Exception e) {
-			Main.LOGGER.info(getName()+": "+ e.getMessage());
-			System.exit(0);
+			listenToRequests(port);
 		}		
 	}
 
