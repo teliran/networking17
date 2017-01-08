@@ -1,4 +1,5 @@
 package network3;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 public class Main {	
@@ -9,10 +10,14 @@ public class Main {
 	public static void main(String[] args) {
 		server = new Server("SWiliNetworking17");
 		client = new Client("CWiliNetworking17");
-		Thread serverThread = new Thread(server);
-		Thread clientThread = new Thread(client);
-		serverThread.start();
-		clientThread.start();
+		try {
+			server.createTcpSocket(6000, 7000);
+		} catch (IOException e) {}
+		
+		while(true){
+			server.run();
+			client.run();
+		}	
 	}
 
 }

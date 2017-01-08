@@ -33,14 +33,12 @@ public class Client implements Runnable{
 	private void sendRequest(int port){
 		byte[] messageRequest = createRequestMessage();
 		try {
-			synchronized(Main.server){
-				DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
-				DatagramSocket udpSocket = new DatagramSocket();
-				udpSocket.setBroadcast(true);
-				udpSocket.send(udpPacket);
-				Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
-				udpSocket.close();
-			}
+			DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
+			DatagramSocket udpSocket = new DatagramSocket();
+			udpSocket.setBroadcast(true);
+			udpSocket.send(udpPacket);
+			Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
+			udpSocket.close();
 			listenToOffer(6000);
 		} catch (Exception e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
@@ -52,27 +50,18 @@ public class Client implements Runnable{
 		byte[] offerMessage = new byte[26];
 		DatagramSocket udpSocket = null;		
 		try {
-			synchronized(Main.server){
-				udpSocket = new DatagramSocket(port);
-				udpSocket.setSoTimeout(1000);
-				Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
-				DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
-				udpSocket.receive(datagram);
-				readOfferMessage(datagram);
-				udpSocket.close();
-				Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
-			}
+			udpSocket = new DatagramSocket(port);
+			udpSocket.setSoTimeout(1000);
+			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+			DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
+			udpSocket.receive(datagram);
+			readOfferMessage(datagram);
+			udpSocket.close();
+			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
 		} catch (SocketTimeoutException e){
-			synchronized(Main.server){
-				udpSocket.close();
-			}
-			sendRequest(port);		
+			udpSocket.close();
+			//sendRequest(port);		
 		} catch (Exception e) {
-			synchronized(Main.server){
-				if(udpSocket != null)
-				udpSocket.close();
-			}
-			listenToOffer(port);
 		}		
 	}	
 	private void readOfferMessage(DatagramPacket datagram){
@@ -136,15 +125,13 @@ public class Client implements Runnable{
 	}
 	@Override
 	public void run() {
-		while(true){
-			if (!Main.server.isRx())
-				sendRequest(6000);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Main.LOGGER.info(getName()+": "+ e.getMessage());
-				System.exit(0);
-			}
+		if (!Main.server.isRx())
+			sendRequest(6000);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
 		}
 		
 	}

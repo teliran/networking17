@@ -56,37 +56,26 @@ public class Server implements Runnable {
 		byte[] requestMessage = new byte[32];
 		DatagramSocket udpSocket = null;
 		try {
-			Thread.sleep(100);
-			synchronized(Main.server){
-				udpSocket = new DatagramSocket(port);
-				udpSocket.setSoTimeout(1000);
-				Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
-				DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
-				while(true){
-					udpSocket.receive(datagram);
-					if(!datagram.getAddress().equals(InetAddress.getLocalHost().getHostAddress()))
-						break;
-				}
-				
-				Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
-				udpSocket.send(createOffer(datagram.getData()));
-				Main.LOGGER.info(getName()+": "+ "offer message has been sent");
-				udpSocket.close();
+			udpSocket = new DatagramSocket(port);
+			udpSocket.setSoTimeout(1000);
+			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
+			while(true){
+				udpSocket.receive(datagram);
+				if(!datagram.getAddress().equals(InetAddress.getLocalHost().getHostAddress()))
+					break;
 			}
+			
+			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
+			udpSocket.send(createOffer(datagram.getData()));
+			Main.LOGGER.info(getName()+": "+ "offer message has been sent");
+			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
 			establishTCPConnection();	
 		}catch (SocketTimeoutException s) {
-			synchronized(Main.server){
-				udpSocket.close();
-			}
+			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
-			listenToRequests(6000);	
 		} catch (Exception e) {
-			synchronized(Main.server){
-				if(udpSocket != null)
-					udpSocket.close();
-			}
-			listenToRequests(port);
 		}		
 	}
 
@@ -129,12 +118,6 @@ public class Server implements Runnable {
 	}
 	@Override
 	public void run() {	
-		try {
-			createTcpSocket(6000, 7000);
-		} catch (IOException e) {
-			Main.LOGGER.info(getName()+": "+ e.getMessage());
-			System.exit(0);
-		}	
 		listenToRequests(6000);	
 	}
 
