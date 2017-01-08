@@ -62,6 +62,7 @@ public class Client implements Runnable{
 			udpSocket.close();
 			//sendRequest(port);		
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}		
 	}	
 	private void readOfferMessage(DatagramPacket datagram){
@@ -127,12 +128,6 @@ public class Client implements Runnable{
 	public void run() {
 		if (!Main.server.isRx())
 			sendRequest(6000);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			Main.LOGGER.info(getName()+": "+ e.getMessage());
-			System.exit(0);
-		}
 		
 	}
 

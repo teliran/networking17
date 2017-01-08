@@ -60,11 +60,7 @@ public class Server implements Runnable {
 			udpSocket.setSoTimeout(1000);
 			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
-			while(true){
-				udpSocket.receive(datagram);
-				if(!datagram.getAddress().equals(InetAddress.getLocalHost().getHostAddress()))
-					break;
-			}
+			udpSocket.receive(datagram);
 			
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
 			udpSocket.send(createOffer(datagram.getData()));
@@ -75,8 +71,7 @@ public class Server implements Runnable {
 		}catch (SocketTimeoutException s) {
 			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
-		} catch (Exception e) {
-		}		
+		} catch (Exception e) {}		
 	}
 
 	private DatagramPacket createOffer(byte[] requestMessage){
