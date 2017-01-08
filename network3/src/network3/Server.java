@@ -74,6 +74,7 @@ public class Server implements Runnable {
 		} catch (Exception e) {
 			if(udpSocket!= null)
 				udpSocket.close();
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
 		}		
 	}
 
