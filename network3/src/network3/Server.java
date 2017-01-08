@@ -82,6 +82,9 @@ public class Server implements Runnable {
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
 			listenToRequests(6000);	
 		} catch (Exception e) {
+			synchronized(Main.server){
+				udpSocket.close();
+			}
 			listenToRequests(port);
 		}		
 	}
