@@ -1,8 +1,7 @@
 package network3;
 
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.net.*;
 import java.nio.ByteBuffer;
 
 public class Client implements Runnable{
@@ -34,12 +33,87 @@ public class Client implements Runnable{
 	private void sendRequest(int port){
 		byte[] messageRequest = createRequestMessage();
 		try {
-			DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
-			Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
+			synchronized(Main.server){
+				DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
+				DatagramSocket udpSocket = new DatagramSocket();
+				udpSocket.setBroadcast(true);
+				udpSocket.send(udpPacket);
+				Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
+				udpSocket.close();
+			}
+			listenToOffer(6000);
+		} catch (Exception e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}
+	}
+	
+	private void listenToOffer(int port){
+		byte[] offerMessage = new byte[26];
+		DatagramSocket udpSocket = null;		
+		try {
+			synchronized(Main.server){
+				udpSocket = new DatagramSocket(port);
+				udpSocket.setSoTimeout(1000);
+				Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+				DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
+				udpSocket.receive(datagram);
+				readOfferMessage(datagram);
+				udpSocket.close();
+				Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
+			}
+		} catch (SocketTimeoutException e){
+			synchronized(Main.server){
+				udpSocket.close();
+			}
+			sendRequest(port);		
+		} catch (Exception e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}		
+	}	
+	private void readOfferMessage(DatagramPacket datagram){
+		byte[] offerData = datagram.getData();
+		byte[] serverIpByte = new byte[4];
+		byte[] serverPortByte = new byte[2];
+		byte[] uniqeNumByte = new byte[4];
+		byte[] serverNameByte = new byte[16];
+		
+		for (int i=0; i<4; i++){
+			serverIpByte[i] = offerData[i+20];
+		}
+		for (int i=0; i<2; i++){
+			serverPortByte[i] = offerData[i+24];
+		}
+		for (int i=0; i<4; i++){
+			uniqeNumByte[i] = offerData[i+16];
+		}
+		for (int i=0; i<16; i++){
+			serverNameByte[i] = offerData[i];
+		}
+		InetAddress serverIp = null;
+		try {
+			serverIp = InetAddress.getByAddress(serverIpByte);
 		} catch (UnknownHostException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
 		}
+		int port = ByteBuffer.wrap(serverPortByte).getInt();
+		int uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
+		String serverName = new String(serverNameByte); 		
+		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+" - "+ uniqeNum+" has been recivied");
+		connectToServerByTcp(serverName,serverIp,port);
+	}
+	
+	private void connectToServerByTcp(String name, InetAddress ip, int port){
+		try {
+			Socket clientSocket = new Socket(ip,port);
+			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name);
+			setTx(true);
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}	
 	}
 
 	public boolean isTx() {
@@ -47,6 +121,10 @@ public class Client implements Runnable{
 	}
 
 	public void setTx(boolean tx) {
+		String status = "-off";
+		if (tx)
+			status = "-on";
+		Main.LOGGER.info(getName()+": "+ "Tx" + status);
 		this.tx = tx;
 	}
 	
@@ -55,7 +133,17 @@ public class Client implements Runnable{
 	}
 	@Override
 	public void run() {
-		sendRequest(6000);
+		while(true){
+			if (!Main.server.isRx())
+				sendRequest(6000);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Main.LOGGER.info(getName()+": "+ e.getMessage());
+				System.exit(0);
+			}
+		}
+		
 	}
 
 }

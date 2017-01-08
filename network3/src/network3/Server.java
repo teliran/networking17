@@ -21,28 +21,65 @@ public class Server implements Runnable {
 	        try {
 	        	int port = (int) (Math.random() * (toPort - fromPort)) + fromPort;
 	            this.tcpSocket = new ServerSocket(port);
+	            this.tcpSocket.setSoTimeout(1000);
+	            Main.LOGGER.info(getName()+": "+ " create socket with TCP port : "+ port);
 	            return;
 	        } catch (IOException ex) {
 	        	this.tcpSocket = null;
 	            continue; // try next port
 	        }
 	    }
-
 	    // if the program gets here, no port in the range was found
 	    throw new IOException("no free tcp port found");
+	}
+	private void establishTCPConnection(){
+		try{
+		    Main.LOGGER.info(getName()+": "+ " Listenning on TCP port : "+ this.tcpSocket.getLocalPort());
+		    Socket client = this.tcpSocket.accept();
+			Main.LOGGER.info(getName()+": "+ " establish TCP connection with: "+ client.getRemoteSocketAddress());
+			setRx(true);
+			//TODO - getMessage
+			client.close();
+		}
+		catch (SocketTimeoutException s) {
+			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
+			listenToRequests(6000);
+		}
+		catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}	
 	}
 	
 	///***UDP***///
 	private void listenToRequests(int port){
 		byte[] requestMessage = new byte[32];
-		DatagramSocket udpSocket;
+		DatagramSocket udpSocket = null;
 		try {
-			udpSocket = new DatagramSocket(port);
-			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
-			udpSocket.receive(datagram);
-			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
-			udpSocket.send(createOffer(datagram.getData()));
-			udpSocket.close();
+			synchronized(Main.server){
+				udpSocket = new DatagramSocket(port);
+				udpSocket.setSoTimeout(1000);
+				Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+				DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
+				while(true){
+					udpSocket.receive(datagram);
+					if(!datagram.getAddress().equals(InetAddress.getLocalHost().getHostAddress()))
+						break;
+				}
+				
+				Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
+				udpSocket.send(createOffer(datagram.getData()));
+				Main.LOGGER.info(getName()+": "+ "offer message has been sent");
+				udpSocket.close();
+			}
+			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
+			establishTCPConnection();	
+		}catch (SocketTimeoutException s) {
+			synchronized(Main.server){
+				udpSocket.close();
+			}
+			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
+			listenToRequests(6000);	
 		} catch (Exception e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
@@ -66,8 +103,7 @@ public class Server implements Runnable {
 		for (int i=24; i<26; i++){
 			offerMessage[i] = requestMessage[i-24];
 		}
-		Main.LOGGER.info(getName()+": "+ "offer message has been created");
-		setRx(true);
+		Main.LOGGER.info(getName()+": "+ "offer message has been created");		
 		return new DatagramPacket(offerMessage, offerMessage.length);
 	}
 
@@ -77,6 +113,10 @@ public class Server implements Runnable {
 	}
 	
 	public void setRx(boolean rx) {
+		String status = "-off";
+		if (rx)
+			status = "-on";
+		Main.LOGGER.info(getName()+": "+ "Rx" + status);
 		this.rx = rx;
 	}
 	
@@ -84,14 +124,14 @@ public class Server implements Runnable {
 		return name;
 	}
 	@Override
-	public void run() {
-		listenToRequests(6000);		
+	public void run() {	
 		try {
 			createTcpSocket(6000, 7000);
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
-		}		
+		}	
+		listenToRequests(6000);	
 	}
 
 }
