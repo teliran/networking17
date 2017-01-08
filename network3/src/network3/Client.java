@@ -51,10 +51,11 @@ public class Client implements Runnable{
 		DatagramSocket udpSocket = null;		
 		try {
 			udpSocket = new DatagramSocket(port);
-			udpSocket.setSoTimeout(1000);
+			udpSocket.setSoTimeout(5000);
 			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
 			udpSocket.receive(datagram);
+			Main.LOGGER.info(getName()+": "+ "Got Offer message");
 			readOfferMessage(datagram);
 			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
