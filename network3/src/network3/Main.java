@@ -9,8 +9,8 @@ public class Main {
 	public static Client client; 
 	
 	public static void main(String[] args) {
-		server = new Server("SWiliNetworking17");
-		client = new Client("CWiliNetworking17");
+		server = new Server("SWilNetworking17");
+		client = new Client("CWilNetworking17");
 		try {
 			server.createTcpSocket(6000, 7000);
 		} catch (IOException e) {}
