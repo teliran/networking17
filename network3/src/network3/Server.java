@@ -70,7 +70,7 @@ public class Server {
 	
 	public String makeBrokenMessage(){
 		String clientSentence = getTcpMessage();
-		int mesLenRand = (int)(Math.random()*clientSentence.length()+1);
+		int mesLenRand = (int)(Math.random()*clientSentence.length());
 		if(clientSentence.charAt(mesLenRand) == '~')
 			clientSentence = clientSentence.substring(0,mesLenRand)+"$"+clientSentence.substring(mesLenRand+1);
 		else
