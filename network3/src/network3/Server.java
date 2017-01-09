@@ -87,7 +87,7 @@ public class Server {
 			offerMessage[i] = name[i];
 		}
 		for (int i=16; i<20; i++){
-			offerMessage[i] = requestMessage[i+2];
+			offerMessage[i] = requestMessage[i];
 		}
 		byte[] serverIp = null;
 		InetAddress ip = null;
@@ -99,7 +99,7 @@ public class Server {
 			offerMessage[i] = serverIp[i-20];
 		}
 		for (int i=24; i<26; i++){
-			offerMessage[i] = serverPort[i-24];
+			offerMessage[i] = serverPort[i-24+2];
 		}
 		Main.LOGGER.info(getName()+": "+ "offer message has been created and send to "+datagram.getAddress());			
 		return new DatagramPacket(offerMessage, offerMessage.length,datagram.getAddress(),6000);
