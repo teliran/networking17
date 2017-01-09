@@ -136,7 +136,6 @@ public class Client{
 		try {
 			input = inputUser.readLine();
 			sendMessageByTcp(input);
-			inputUser.close();
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
