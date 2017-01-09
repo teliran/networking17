@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.*;
 
 
-public class Server implements Runnable {
+public class Server {
 	private String name;
 	private boolean rx;
 	private ServerSocket tcpSocket = null;
@@ -21,7 +21,7 @@ public class Server implements Runnable {
 	        try {
 	        	int port = (int) (Math.random() * (toPort - fromPort)) + fromPort;
 	            this.tcpSocket = new ServerSocket(port);
-	            this.tcpSocket.setSoTimeout(1000);
+	            this.tcpSocket.setSoTimeout(5000);
 	            Main.LOGGER.info(getName()+": "+ " create socket with TCP port : "+ port);
 	            return;
 	        } catch (IOException ex) {
@@ -32,7 +32,7 @@ public class Server implements Runnable {
 	    // if the program gets here, no port in the range was found
 	    throw new IOException("no free tcp port found");
 	}
-	private void establishTCPConnection(){
+	public void establishTCPConnection(){
 		try{
 		    Main.LOGGER.info(getName()+": "+ " Listenning on TCP port : "+ this.tcpSocket.getLocalPort());
 		    Socket client = this.tcpSocket.accept();
@@ -43,7 +43,6 @@ public class Server implements Runnable {
 		}
 		catch (SocketTimeoutException s) {
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
-			listenToRequests(6000);
 		}
 		catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
@@ -52,23 +51,27 @@ public class Server implements Runnable {
 	}
 	
 	///***UDP***///
-	private void listenToRequests(int port){
-		byte[] requestMessage = new byte[32];
+	public void listenToRequests(int port){
+		byte[] requestMessage = new byte[20];
 		DatagramSocket udpSocket = null;
 		try {
 			udpSocket = new DatagramSocket(port);
 			udpSocket.setSoTimeout(1000);
-			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+			Main.LOGGER.info(getName()+": "+ "Listenning for Requests on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
 			udpSocket.receive(datagram);
-			
+			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
-			udpSocket.send(createOffer(datagram));
+			udpSocket = new DatagramSocket(port);
+			udpSocket.setSoTimeout(1000);
+			udpSocket.setBroadcast(true);
+			DatagramPacket packetToSend = createOffer(datagram);
+			udpSocket.send(packetToSend);
 			udpSocket.close();
 			establishTCPConnection();	
 		}catch (SocketTimeoutException s) {
 			udpSocket.close();
-			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
+			Main.LOGGER.info(getName()+": "+ "UDP Requests Timeout");
 		} catch (Exception e) {
 			if(udpSocket!= null)
 				udpSocket.close();
@@ -76,7 +79,7 @@ public class Server implements Runnable {
 		}		
 	}
 
-	private DatagramPacket createOffer(DatagramPacket datagram){
+	public DatagramPacket createOffer(DatagramPacket datagram){
 		byte[] requestMessage = datagram.getData();
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
@@ -87,8 +90,10 @@ public class Server implements Runnable {
 			offerMessage[i] = requestMessage[i];
 		}
 		byte[] serverIp = null;
+		InetAddress ip = null;
 		try {
-			serverIp = InetAddress.getLocalHost().getAddress();
+			ip = InetAddress.getLocalHost();
+			serverIp = ip.getAddress();
 		} catch (UnknownHostException e) {}
 
 		for (int i=20; i<=23; i++){
@@ -118,9 +123,4 @@ public class Server implements Runnable {
 	public String getName(){
 		return name;
 	}
-	@Override
-	public void run() {	
-		listenToRequests(6000);	
-	}
-
 }

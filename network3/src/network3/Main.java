@@ -1,5 +1,6 @@
 package network3;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.util.logging.Logger;
 
 public class Main {	
@@ -15,9 +16,13 @@ public class Main {
 		} catch (IOException e) {}
 		
 		while(true){
-			server.run();
-			client.run();
-		}	
+			server.listenToRequests(6000);
+			if (!server.isRx()){
+				client.listenToOffer(6000);
+				client.sendRequest(6000);
+			}
+		}
+
 	}
 
 }

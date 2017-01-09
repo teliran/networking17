@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
-public class Client implements Runnable{
+public class Client{
 	private String name;
 	private boolean tx;
 	
@@ -30,7 +30,7 @@ public class Client implements Runnable{
 		return messageRequest;
 	}
 	
-	private void sendRequest(int port){
+	public void sendRequest(int port){
 		byte[] messageRequest = createRequestMessage();
 		try {
 			DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
@@ -38,36 +38,44 @@ public class Client implements Runnable{
 			udpSocket.setBroadcast(true);
 			udpSocket.send(udpPacket);
 			Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
-			udpSocket.close();
-			listenToOffer(6000);
+			udpSocket.close();						
 		} catch (Exception e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
 		}
 	}
 	
-	private void listenToOffer(int port){
+	public void listenToOffer(int port){
 		byte[] offerMessage = new byte[26];
 		DatagramSocket udpSocket = null;		
 		try {
 			udpSocket = new DatagramSocket(port);
-			udpSocket.setSoTimeout(5000);
-			Main.LOGGER.info(getName()+": "+ "Listenning on UDP port : "+ port);
+			udpSocket.setSoTimeout(1000);
+			Main.LOGGER.info(getName()+": "+ "Listenning to offer on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
-			udpSocket.receive(datagram);
+			InetAddress myIp=null;
+			try {
+				myIp = InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {}
+			while(true){
+				udpSocket.receive(datagram);
+				if(datagram.getLength() == offerMessage.length)
+					break;
+			}
+			
 			Main.LOGGER.info(getName()+": "+ "Got Offer message");
-			readOfferMessage(datagram);
 			udpSocket.close();
-			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");
+			Main.LOGGER.info(getName()+": "+ "UDP port has been closed");		
+			readOfferMessage(datagram,udpSocket.getInetAddress());		
 		} catch (SocketTimeoutException e){
 			udpSocket.close();
-			//sendRequest(port);		
+			Main.LOGGER.info(getName()+": "+ "UDF Offer timeout");
 		} catch (Exception e) {
 			if(udpSocket!= null)
 				udpSocket.close();
 		}		
 	}	
-	private void readOfferMessage(DatagramPacket datagram){
+	private void readOfferMessage(DatagramPacket datagram,InetAddress ipSocket){
 		byte[] offerData = datagram.getData();
 		byte[] serverIpByte = new byte[4];
 		byte[] serverPortByte = new byte[2];
@@ -86,25 +94,27 @@ public class Client implements Runnable{
 		for (int i=0; i<16; i++){
 			serverNameByte[i] = offerData[i];
 		}
-		InetAddress serverIp = null;
+		InetAddress serverIp;
 		try {
 			serverIp = InetAddress.getByAddress(serverIpByte);
 		} catch (UnknownHostException e) {
-			Main.LOGGER.info(getName()+": "+ e.getMessage());
-			System.exit(0);
+			Main.LOGGER.info(getName()+": "+ "problem with find ip , take from socket");
+			serverIp = ipSocket;
 		}
 		int port = ByteBuffer.wrap(serverPortByte).getInt();
 		int uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
 		String serverName = new String(serverNameByte); 		
-		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+" - "+ uniqeNum+" has been recivied");
+		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+":"+ port+ " - "+ uniqeNum+" has been recivied");
 		connectToServerByTcp(serverName,serverIp,port);
 	}
 	
 	private void connectToServerByTcp(String name, InetAddress ip, int port){
 		try {
 			Socket clientSocket = new Socket(ip,port);
-			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name);
+			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name+" :"+ip);
 			setTx(true);
+			
+			//TODO: DO SOMTHING WITH MASSAGE
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
@@ -125,12 +135,6 @@ public class Client implements Runnable{
 	
 	public String getName(){
 		return name;
-	}
-	@Override
-	public void run() {
-		if (!Main.server.isRx())
-			sendRequest(6000);
-		
 	}
 
 }
