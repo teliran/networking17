@@ -32,6 +32,7 @@ public class Main {
 			}
 			if(server.isRx() && !client.isTx()){ //Rx-on-tx-off
 				System.out.println(server.getTcpMessage());
+				
 			}
 			 
 		}
