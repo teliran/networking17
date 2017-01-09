@@ -97,15 +97,23 @@ public class Client{
 		}
 		InetAddress serverIp;
 		//for DEBUG
+		String serverName;
+		int port;
+		int uniqeNum;
 		try {
 			serverIp = InetAddress.getByAddress(serverIpByte);
+			port = ByteBuffer.wrap(serverPortByte).getInt();
+			uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
+			serverName = new String(serverNameByte); 
 		} catch (UnknownHostException e) {
 			Main.LOGGER.info(getName()+": "+ "problem to find ip , take from socket");
 			serverIp = ipSocket;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
-		int port = ByteBuffer.wrap(serverPortByte).getInt();
-		int uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
-		String serverName = new String(serverNameByte); 		
+				
+		
+		
 		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+":"+ port+ " - "+ uniqeNum+" has been recivied");
 		connectToServerByTcp(serverName,serverIp,port);
 	}
