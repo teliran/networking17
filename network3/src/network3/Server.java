@@ -80,6 +80,7 @@ public class Server {
 		byte[] requestMessage = datagram.getData();
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
+		byte[] serverPort = (tcpSocket.getLocalPort()+"").getBytes();
 		for (int i=0; i<=15; i++){
 			offerMessage[i] = name[i];
 		}
@@ -92,13 +93,11 @@ public class Server {
 			ip = InetAddress.getLocalHost();
 			serverIp = ip.getAddress();
 		} catch (UnknownHostException e) {}
-
 		for (int i=20; i<=23; i++){
 			offerMessage[i] = serverIp[i-20];
 		}
-		byte[] serverPort = (tcpSocket.getLocalPort()+"").getBytes();
 		for (int i=24; i<26; i++){
-			offerMessage[i] = requestMessage[i-24];
+			offerMessage[i] = serverPort[i-24];
 		}
 		Main.LOGGER.info(getName()+": "+ "offer message has been created and send to "+datagram.getAddress());			
 		return new DatagramPacket(offerMessage, offerMessage.length,datagram.getAddress(),6000);

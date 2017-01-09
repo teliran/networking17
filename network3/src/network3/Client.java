@@ -71,6 +71,7 @@ public class Client{
 			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "UDF Offer timeout");
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			if(udpSocket!= null)
 				udpSocket.close();
 		}		
