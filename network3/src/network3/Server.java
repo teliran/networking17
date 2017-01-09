@@ -2,6 +2,7 @@ package network3;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 
 public class Server {
@@ -80,12 +81,13 @@ public class Server {
 		byte[] requestMessage = datagram.getData();
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
-		byte[] serverPort = (tcpSocket.getLocalPort()+"").getBytes();
+		int portNum = tcpSocket.getLocalPort();
+		byte[] serverPort = ByteBuffer.allocate(4).putInt(portNum).array();	;
 		for (int i=0; i<=15; i++){
 			offerMessage[i] = name[i];
 		}
 		for (int i=16; i<20; i++){
-			offerMessage[i] = requestMessage[i];
+			offerMessage[i] = requestMessage[i+2];
 		}
 		byte[] serverIp = null;
 		InetAddress ip = null;

@@ -69,7 +69,7 @@ public class Client{
 			readOfferMessage(datagram,udpSocket.getInetAddress());		
 		} catch (SocketTimeoutException e){
 			udpSocket.close();
-			Main.LOGGER.info(getName()+": "+ "UDF Offer timeout");
+			Main.LOGGER.info(getName()+": "+ "UDP Offer timeout");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			if(udpSocket!= null)
