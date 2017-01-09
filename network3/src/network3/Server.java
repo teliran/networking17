@@ -58,6 +58,7 @@ public class Server {
 		String clientSentence = "R2D2 -Junk Message";
 		try {
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientTcpSocket.getInputStream()));
+			System.out.println("Waiting for secret from client...");
 			clientSentence = inFromClient.readLine();
 			Main.LOGGER.info(getName()+": Get message '"+clientSentence+"' From "+clientName);			
 		} catch (IOException e) {
