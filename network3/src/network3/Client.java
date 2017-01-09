@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 
 public class Client{
 	private String name;
+	private String serverName;
 	private boolean tx;
 	private Socket tcpOpenClientSocket;
 	
@@ -100,8 +101,6 @@ public class Client{
 			serverNameByte[i] = offerData[i];
 		}
 		InetAddress serverIp = null;
-		//for DEBUG
-		String serverName= null;
 		int port =0;
 		int uniqeNum = 0;
 		
@@ -109,7 +108,7 @@ public class Client{
 			serverIp = InetAddress.getByAddress(serverIpByte);
 			port = ByteBuffer.wrap(serverPortByte).getShort();
 			uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
-			serverName = new String(serverNameByte); 
+			this.serverName = new String(serverNameByte); 
 		} catch (UnknownHostException e) {
 			Main.LOGGER.info(getName()+": "+ "problem to find ip , take from socket");
 			serverIp = ipSocket;
@@ -135,10 +134,20 @@ public class Client{
 		String input;
 		BufferedReader inputUser = new BufferedReader( new InputStreamReader(System.in));
 		try {
-			DataOutputStream outToServer = new DataOutputStream(this.tcpOpenClientSocket.getOutputStream());
 			input = inputUser.readLine();
-			outToServer.writeBytes(input + '\n');
+			sendMessageByTcp(input);
 			inputUser.close();
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}	
+	}
+	
+	public void sendMessageByTcp(String sentence){
+		try {
+			DataOutputStream outToServer = new DataOutputStream(this.tcpOpenClientSocket.getOutputStream());
+			outToServer.writeBytes(sentence + '\n');
+			Main.LOGGER.info(getName()+": Send Message '"+sentence+"' to "+this.serverName);
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);

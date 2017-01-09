@@ -25,6 +25,15 @@ public class Main {
 			if(!server.isRx() && client.isTx()){ //Rx-off-tx-on
 				client.sendMessageByTcp();
 			}
+			
+			if(server.isRx() && client.isTx()){ //Rx-on-tx-on
+				String brokenMessage = server.makeBrokenMessage(); //get message from client and brake it!
+				client.sendMessageByTcp(brokenMessage);
+			}
+			if(server.isRx() && !client.isTx()){ //Rx-on-tx-off
+				System.out.println(server.getTcpMessage());
+			}
+			 
 		}
 
 	}

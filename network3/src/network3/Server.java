@@ -1,6 +1,9 @@
 package network3;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.ByteBuffer;
 
@@ -9,6 +12,8 @@ public class Server {
 	private String name;
 	private boolean rx;
 	private ServerSocket tcpSocket = null;
+	private Socket clientTcpSocket;
+	private String clientName;
 	
 	public Server(String name){
 		this.name = name;
@@ -36,11 +41,9 @@ public class Server {
 	public void establishTCPConnection(){
 		try{
 		    Main.LOGGER.info(getName()+": "+ " Listenning on TCP port : "+ this.tcpSocket.getLocalPort());
-		    Socket client = this.tcpSocket.accept();
-			Main.LOGGER.info(getName()+": "+ " establish TCP connection with: "+ client.getRemoteSocketAddress());
+		    clientTcpSocket = this.tcpSocket.accept();
+			Main.LOGGER.info(getName()+": "+ " establish TCP connection with: "+ clientTcpSocket.getRemoteSocketAddress());
 			setRx(true);
-			//TODO - getMessage
-			client.close();
 		}
 		catch (SocketTimeoutException s) {
 			Main.LOGGER.info(getName()+": "+ " TCP socket timeout");
@@ -49,6 +52,39 @@ public class Server {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
 		}	
+	}
+	
+	public String getTcpMessage(){
+		String clientSentence = "R2D2 -Junk Message";
+		try {
+			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientTcpSocket.getInputStream()));
+			clientSentence = inFromClient.readLine();
+			Main.LOGGER.info(getName()+": Get message '"+clientSentence+"' From "+clientName);			
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}
+		return clientSentence;
+	}
+
+	
+	public String makeBrokenMessage(){
+		String clientSentence = getTcpMessage();
+		int mesLenRand = (int)(Math.random()*clientSentence.length()+1);
+		if(clientSentence.charAt(mesLenRand) == '~')
+			clientSentence = clientSentence.substring(0,mesLenRand)+"$"+clientSentence.substring(mesLenRand+1);
+		else
+			clientSentence = clientSentence.substring(0,mesLenRand)+"~"+clientSentence.substring(mesLenRand+1);
+		return clientSentence;		
+	}
+	
+	public void closeTCPCSocket(){
+		try {
+			clientTcpSocket.close();
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}		
 	}
 	
 	///***UDP***///
@@ -81,11 +117,14 @@ public class Server {
 		byte[] requestMessage = datagram.getData();
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
+		byte[] clientName = new byte[16];
 		int portNum = tcpSocket.getLocalPort();
 		byte[] serverPort = ByteBuffer.allocate(4).putInt(portNum).array();	;
 		for (int i=0; i<=15; i++){
+			clientName[i] = requestMessage[i];
 			offerMessage[i] = name[i];
 		}
+		this.clientName = new String(clientName);
 		for (int i=16; i<20; i++){
 			offerMessage[i] = requestMessage[i];
 		}
