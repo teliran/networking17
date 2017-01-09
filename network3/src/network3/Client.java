@@ -95,11 +95,12 @@ public class Client{
 		for (int i=0; i<16; i++){
 			serverNameByte[i] = offerData[i];
 		}
-		InetAddress serverIp;
+		InetAddress serverIp = null;
 		//for DEBUG
-		String serverName;
-		int port;
-		int uniqeNum;
+		String serverName= null;
+		int port =0;
+		int uniqeNum = 0;
+		
 		try {
 			serverIp = InetAddress.getByAddress(serverIpByte);
 			port = ByteBuffer.wrap(serverPortByte).getInt();
@@ -110,10 +111,7 @@ public class Client{
 			serverIp = ipSocket;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		}
-				
-		
-		
+		}	
 		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+":"+ port+ " - "+ uniqeNum+" has been recivied");
 		connectToServerByTcp(serverName,serverIp,port);
 	}
