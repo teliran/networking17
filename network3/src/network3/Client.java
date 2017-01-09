@@ -34,7 +34,7 @@ public class Client{
 		byte[] messageRequest = createRequestMessage();
 		try {
 			DatagramPacket udpPacket = new DatagramPacket(messageRequest, messageRequest.length, InetAddress.getByName("255.255.255.255"), port);
-			DatagramSocket udpSocket = new DatagramSocket();
+			DatagramSocket udpSocket = new DatagramSocket(port);
 			udpSocket.setBroadcast(true);
 			udpSocket.send(udpPacket);
 			Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
@@ -95,10 +95,11 @@ public class Client{
 			serverNameByte[i] = offerData[i];
 		}
 		InetAddress serverIp;
+		//for DEBUG
 		try {
 			serverIp = InetAddress.getByAddress(serverIpByte);
 		} catch (UnknownHostException e) {
-			Main.LOGGER.info(getName()+": "+ "problem with find ip , take from socket");
+			Main.LOGGER.info(getName()+": "+ "problem to find ip , take from socket");
 			serverIp = ipSocket;
 		}
 		int port = ByteBuffer.wrap(serverPortByte).getInt();
@@ -112,8 +113,7 @@ public class Client{
 		try {
 			Socket clientSocket = new Socket(ip,port);
 			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name+" :"+ip);
-			setTx(true);
-			
+			setTx(true);			
 			//TODO: DO SOMTHING WITH MASSAGE
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());

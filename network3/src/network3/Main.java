@@ -14,12 +14,12 @@ public class Main {
 		try {
 			server.createTcpSocket(6000, 7000);
 		} catch (IOException e) {}
-		
 		while(true){
 			server.listenToRequests(6000);
 			if (!server.isRx()){
-				client.listenToOffer(6000);
 				client.sendRequest(6000);
+				client.listenToOffer(6000);
+
 			}
 		}
 

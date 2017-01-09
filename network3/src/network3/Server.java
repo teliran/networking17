@@ -60,13 +60,10 @@ public class Server {
 			Main.LOGGER.info(getName()+": "+ "Listenning for Requests on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(requestMessage, requestMessage.length);
 			udpSocket.receive(datagram);
-			udpSocket.close();
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
-			udpSocket = new DatagramSocket(port);
-			udpSocket.setSoTimeout(1000);
 			udpSocket.setBroadcast(true);
 			DatagramPacket packetToSend = createOffer(datagram);
-			udpSocket.send(packetToSend);
+			udpSocket.send(packetToSend);					
 			udpSocket.close();
 			establishTCPConnection();	
 		}catch (SocketTimeoutException s) {
