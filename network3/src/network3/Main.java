@@ -15,11 +15,15 @@ public class Main {
 			server.createTcpSocket(6000, 7000);
 		} catch (IOException e) {}
 		while(true){	
-			if (!server.isRx()){
+			if (!server.isRx()){ //Rx-off-tx-of
 				server.listenToRequests(6000);
+			}
+			if (!server.isRx() && !client.isTx()){ //Rx-off-tx-off
 				client.sendRequest(6000);
 				client.listenToOffer(6000);
-
+			}
+			if(!server.isRx() && client.isTx()){ //Rx-off-tx-on
+				client.sendMessageByTcp();
 			}
 		}
 

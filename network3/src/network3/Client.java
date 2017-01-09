@@ -1,12 +1,16 @@
 package network3;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.ByteBuffer;
 
 public class Client{
 	private String name;
 	private boolean tx;
+	private Socket tcpOpenClientSocket;
 	
 	
 	public Client(String name){
@@ -118,14 +122,37 @@ public class Client{
 	
 	private void connectToServerByTcp(String name, InetAddress ip, int port){
 		try {
-			Socket clientSocket = new Socket(ip,port);
+			this.tcpOpenClientSocket = new Socket(ip,port);
 			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name+" :"+ip+":"+port);
-			setTx(true);			
-			//TODO: DO SOMTHING WITH MASSAGE
+			setTx(true); //tx-on-rx-off	
 		} catch (IOException e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
 			System.exit(0);
 		}	
+	}
+	
+	public void sendMessageByTcp(){
+		String input;
+		BufferedReader inputUser = new BufferedReader( new InputStreamReader(System.in));
+		try {
+			DataOutputStream outToServer = new DataOutputStream(this.tcpOpenClientSocket.getOutputStream());
+			input = inputUser.readLine();
+			outToServer.writeBytes(input + '\n');
+			inputUser.close();
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}	
+	}
+	
+	public void closeTcpSocket(){
+		try {
+			this.tcpOpenClientSocket.close();
+			Main.LOGGER.info(getName()+": Tcp socket has been closed");
+		} catch (IOException e) {
+			Main.LOGGER.info(getName()+": "+ e.getMessage());
+			System.exit(0);
+		}
 	}
 
 	public boolean isTx() {
