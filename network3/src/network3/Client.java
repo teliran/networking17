@@ -103,7 +103,7 @@ public class Client{
 		
 		try {
 			serverIp = InetAddress.getByAddress(serverIpByte);
-			port = ByteBuffer.wrap(serverPortByte).getInt();
+			port = ByteBuffer.wrap(serverPortByte).getShort();
 			uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
 			serverName = new String(serverNameByte); 
 		} catch (UnknownHostException e) {
