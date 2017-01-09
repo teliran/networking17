@@ -32,6 +32,7 @@ public class Client{
 		for (int i=16; i<20; i++){
 			messageRequest[i] = number[i-16];
 		}
+		Main.LOGGER.info(getName()+": "+ "Request No."+randNumber+ " created");
 		return messageRequest;
 	}
 	
@@ -42,7 +43,7 @@ public class Client{
 			DatagramSocket udpSocket = new DatagramSocket(port);
 			udpSocket.setBroadcast(true);
 			udpSocket.send(udpPacket);
-			Main.LOGGER.info(getName()+": "+ "Message Request has been created and sent");
+			Main.LOGGER.info(getName()+": "+ "Request sent to server");
 			udpSocket.close();						
 		} catch (Exception e) {
 			Main.LOGGER.info(getName()+": "+ e.getMessage());
@@ -134,6 +135,7 @@ public class Client{
 		String input;
 		BufferedReader inputUser = new BufferedReader( new InputStreamReader(System.in));
 		try {
+			System.out.print("Enter your secret: ");
 			input = inputUser.readLine();
 			sendMessageByTcp(input);
 		} catch (IOException e) {
