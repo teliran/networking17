@@ -119,7 +119,7 @@ public class Client{
 	private void connectToServerByTcp(String name, InetAddress ip, int port){
 		try {
 			Socket clientSocket = new Socket(ip,port);
-			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name+" :"+ip);
+			Main.LOGGER.info(getName()+": "+ "create TCP connection with "+name+" :"+ip+":"+port);
 			setTx(true);			
 			//TODO: DO SOMTHING WITH MASSAGE
 		} catch (IOException e) {
