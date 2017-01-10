@@ -1,7 +1,6 @@
 package network3;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
@@ -98,8 +97,12 @@ public class Server {
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
 			udpSocket.setBroadcast(true);
 			DatagramPacket packetToSend = createOffer(datagram);
-			if(packetToSend == null) // if not valid request
+			if(packetToSend == null){
+				// if not valid request
+				udpSocket.close();
 				return;
+			}
+				
 			udpSocket.send(packetToSend);					
 			udpSocket.close();
 			establishTCPConnection();	

@@ -57,10 +57,6 @@ public class Client{
 			udpSocket.setSoTimeout(1000);
 			Main.LOGGER.info(getName()+": "+ "Listenning to offer on UDP port : "+ port);
 			DatagramPacket datagram = new DatagramPacket(offerMessage, offerMessage.length);
-			InetAddress myIp=null;
-			try {
-				myIp = InetAddress.getLocalHost();
-			} catch (UnknownHostException e) {}
 			while(true){
 				udpSocket.receive(datagram);
 				if(datagram.getLength() == offerMessage.length)

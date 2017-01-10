@@ -1,6 +1,5 @@
 package network3;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.util.logging.Logger;
 
 public class Main {	
