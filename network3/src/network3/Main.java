@@ -15,7 +15,7 @@ public class Main {
 		} catch (IOException e) {}
 
 		while(true){	
-			if (!server.isRx()){ //Rx-off-tx-of
+			if (!server.isRx()){ //Rx-off-tx-off
 				server.listenToRequests(6000);
 			}
 			if (!server.isRx() && !client.isTx()){ //Rx-off-tx-off

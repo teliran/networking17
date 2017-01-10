@@ -96,10 +96,12 @@ public class Client{
 			serverNameByte[i] = offerData[i];
 		}
 		InetAddress serverIp = null;
+		InetAddress myIp = null;
 		int port =0;
 		int uniqeNum = 0;
 		
 		try {
+			myIp = InetAddress.getLocalHost();
 			serverIp = InetAddress.getByAddress(serverIpByte);
 			port = ByteBuffer.wrap(serverPortByte).getShort();
 			uniqeNum = ByteBuffer.wrap(uniqeNumByte).getInt();
@@ -110,7 +112,7 @@ public class Client{
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		if(!serverName.contains("Networking17")){
+		if(!serverName.contains("Networking17") || serverIp.equals(myIp)){
 			Main.LOGGER.info(getName()+": "+ "The offer is not from 'Networking17' !!");
 			return;
 		}
