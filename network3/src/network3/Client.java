@@ -113,7 +113,11 @@ public class Client{
 			serverIp = ipSocket;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		}	
+		}
+		if(!serverName.contains("Networking17")){
+			Main.LOGGER.info(getName()+": "+ "The offer is not from 'Networking17' !!");
+			return;
+		}
 		Main.LOGGER.info(getName()+": "+ "offer: "+ serverName+":"+ port+ " - "+ uniqeNum+" has been recivied");
 		connectToServerByTcp(serverName,serverIp,port);
 	}

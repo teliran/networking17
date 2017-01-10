@@ -118,6 +118,7 @@ public class Server {
 		byte[] offerMessage = new byte[26];		
 		byte[] name = this.name.getBytes();
 		byte[] clientName = new byte[16];
+		byte[] uniqNumber = new byte[4];
 		int portNum = tcpSocket.getLocalPort();
 		byte[] serverPort = ByteBuffer.allocate(4).putInt(portNum).array();	;
 		for (int i=0; i<=15; i++){
@@ -127,6 +128,7 @@ public class Server {
 		this.clientName = new String(clientName);
 		for (int i=16; i<20; i++){
 			offerMessage[i] = requestMessage[i];
+			uniqNumber[i-16] = requestMessage[i];
 		}
 		byte[] serverIp = null;
 		InetAddress ip = null;
@@ -145,6 +147,8 @@ public class Server {
 			Main.LOGGER.info(getName()+": "+ "The request is not from 'Networking17' !!");
 			return null;
 		}
+		int uniqeNum = ByteBuffer.wrap(uniqNumber).getInt();
+		Main.LOGGER.info(getName()+": "+ "Request info: "+sClientName +" Number:"+uniqeNum);
 		Main.LOGGER.info(getName()+": "+ "offer message has been created and send to "+datagram.getAddress()+" "+sClientName);			
 		return new DatagramPacket(offerMessage, offerMessage.length,datagram.getAddress(),6000);
 	}
