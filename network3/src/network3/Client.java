@@ -16,9 +16,7 @@ public class Client{
 	
 	public Client(String name){
 		this.name = name;
-		this.setTx(false);
-
-		
+		this.tx = false;	
 	}
 	//create a new byte array of the Request message
 	private byte[] createRequestMessage(){
@@ -177,8 +175,15 @@ public class Client{
 		this.tx = tx;
 	}
 	
+	public String getTx() {
+		String status = "-off";
+		if (tx)
+			status = "-on";
+		return "Tx" + status;
+	}
+	
 	public String getName(){
-		return name;
+		return name+"("+Main.server.getRx()+"-"+getTx()+")";
 	}
 
 }

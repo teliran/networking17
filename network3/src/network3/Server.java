@@ -18,7 +18,6 @@ public class Server {
 	public Server(String name){
 		this.name = name;
 		this.rx = false;
-		Main.LOGGER.info(getName()+": "+ "Rx-Off");
 		
 	}
 	//this function find and create a new tcp socket from unused tcp port
@@ -58,7 +57,7 @@ public class Server {
 		String clientSentence = "R2D2 -Junk Message";
 		try {
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientTcpSocket.getInputStream()));
-			System.out.println("Waiting for secret from client...");
+			System.out.println("Waiting for secret from "+clientName +"...");
 			clientSentence = inFromClient.readLine();
 			Main.LOGGER.info(getName()+": Get message '"+clientSentence+"' From "+clientName);			
 		} catch (IOException e) {
@@ -72,10 +71,8 @@ public class Server {
 	public String makeBrokenMessage(){
 		String clientSentence = getTcpMessage();
 		int mesLenRand = (int)(Math.random()*clientSentence.length());
-		if(clientSentence.charAt(mesLenRand) == '~')
-			clientSentence = clientSentence.substring(0,mesLenRand)+"$"+clientSentence.substring(mesLenRand+1);
-		else
-			clientSentence = clientSentence.substring(0,mesLenRand)+"~"+clientSentence.substring(mesLenRand+1);
+		char replace = (char)((Math.random()*(126-33))+33);
+		clientSentence = clientSentence.substring(0,mesLenRand)+replace+clientSentence.substring(mesLenRand+1);
 		return clientSentence;		
 	}
 	
@@ -101,6 +98,8 @@ public class Server {
 			Main.LOGGER.info(getName()+": "+ "request message has been recivied in Server UDP Socket");
 			udpSocket.setBroadcast(true);
 			DatagramPacket packetToSend = createOffer(datagram);
+			if(packetToSend == null) // if not valid request
+				return;
 			udpSocket.send(packetToSend);					
 			udpSocket.close();
 			establishTCPConnection();	
@@ -141,7 +140,12 @@ public class Server {
 		for (int i=24; i<26; i++){
 			offerMessage[i] = serverPort[i-24+2];
 		}
-		Main.LOGGER.info(getName()+": "+ "offer message has been created and send to "+datagram.getAddress());			
+		String sClientName = new String(clientName);
+		if(!sClientName.contains("Networking17")){
+			Main.LOGGER.info(getName()+": "+ "The request is not from 'Networking17' !!");
+			return null;
+		}
+		Main.LOGGER.info(getName()+": "+ "offer message has been created and send to "+datagram.getAddress()+" "+sClientName);			
 		return new DatagramPacket(offerMessage, offerMessage.length,datagram.getAddress(),6000);
 	}
 
@@ -158,7 +162,14 @@ public class Server {
 		this.rx = rx;
 	}
 	
-	public String getName(){
-		return name;
+	public String getRx() {
+		String status = "-off";
+		if (rx)
+			status = "-on";
+		return "Rx" + status;
+	}
+			
+	public String getName(){		
+		return name+"("+getRx()+"-"+Main.client.getTx()+")";
 	}
 }

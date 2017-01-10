@@ -14,6 +14,7 @@ public class Main {
 		try {
 			server.createTcpSocket(6000, 7000);
 		} catch (IOException e) {}
+
 		while(true){	
 			if (!server.isRx()){ //Rx-off-tx-of
 				server.listenToRequests(6000);
